@@ -53,6 +53,7 @@ const getCoords = (x, _y, len, dir, coords = []) => {
 
 const outOfBounds = (coords, grid) => {
   const oob = coords.filter(c => {
+    console.log(c, grid);
     return (
       c.x > grid[0].length-1 ||
       c.x < 0 ||
@@ -72,28 +73,28 @@ const hasCoord = (coords, x, y) => coords.filter(c => {
   return (c.x === x && c.y === y);
 }).length;
 
-const placeRandom = (len, grid) => {
+const placeRandom = (len, key, grid) => {
   const dirs = ['l', 'r', 'u', 'd'];
   const x = Math.floor(Math.random() * 9);
   const y = Math.floor(Math.random() * 9);
   const dir = dirs[Math.floor(Math.random() * 3)];	
-  const updated = placeBoat(x, y, len, dir, grid);
+  const updated = placeBoat(x, y, len, dir, key, grid);
 
   if (!updated) {
-    return placeRandom(len, grid);
+    return placeRandom(len, key, grid);
   } else {
     return updated;
   }
 }
 
-const placeBoat = (x, y, len, dir, grid) => {
+const placeBoat = (x, y, len, dir, key, grid) => {
   const coords = getCoords(x, y, len, dir, []);
   const _illegal =  outOfBounds(coords, grid) > 0 || collision(coords, grid) > 0 ;
 
   if (!_illegal) {
     return grid.map((row, y) => {
       return row.map((val, x) => {
-        return (hasCoord(coords, x, y)) ? '●' : val;
+        return (hasCoord(coords, x, y)) ? key : val;
       });
     });
   }
@@ -126,8 +127,8 @@ const fire = (x, y, opponentBoardHidden, opponentBoardPublic) => {
 
 const fleet = () => ({
   C: 5,
-  b: 4,
   B: 4,
+  b: 4,
   R: 3,
   r: 3,
   D: 2,
@@ -223,13 +224,15 @@ const opponentBoardPublic = makeBoard(gx, gy);
 
 const p1Board = Object.keys(fleet()).reduce( (acc, key) => {
   const len = fleet()[key];
-  return placeRandom(len, acc)
+    console.log('1', acc);
+  return placeRandom(len, key, acc)
 }, initBoard);
 
 // @@TODO placeFleet func
 const p2Board = Object.keys(fleet()).reduce( (acc, key) => {
   const len = fleet()[key];
-  return placeRandom(len, acc)
+    console.log('2', acc);
+  return placeRandom(len, key, acc)
 }, initBoard);
 
 const p1_r1 = fire(Math.floor(Math.random() * 9), Math.floor(Math.random() * 9), p2Board, opponentBoardPublic);
