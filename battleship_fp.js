@@ -51,9 +51,19 @@ const getCoords = (x, _y, len, dir, coords = []) => {
   }
 }
 
+const coordsFromKey = (grid, key) => {
+  const g1 = grid.map( (row, y) => {
+    return row.map( (val, x) => {
+      if (val === key) return [{x: x, y: y}];
+    }).filter( v => v )
+  }).filter( row => row.length > 0 )
+
+  const flatten = g1[0].map( r => r[0]);
+  return flatten;
+}
+
 const outOfBounds = (coords, grid) => {
   const oob = coords.filter(c => {
-    console.log(c, grid);
     return (
       c.x > grid[0].length-1 ||
       c.x < 0 ||
@@ -119,9 +129,19 @@ const updateOpponentBoardPublic = (x, y, hit, grid) => {
   });
 }
 
+const isSunk = (x, y, grid) => {
+  // get x,y key
+  const pubCoords = [];
+  const privCoords = [];
+  // compare - if all are hits it is sunk
+  const sunk = pubCoords.length === privCoords.length;
+  return sunk;
+}
+
 const fire = (x, y, opponentBoardHidden, opponentBoardPublic) => {
   const hit = collision([{x: x, y: y}], opponentBoardHidden);
   const newB = updateOpponentBoardPublic(x, y, hit, opponentBoardPublic);
+  const sunk = isSunk(x, y, newB);
   return newB;
 }
 
@@ -224,16 +244,16 @@ const opponentBoardPublic = makeBoard(gx, gy);
 
 const p1Board = Object.keys(fleet()).reduce( (acc, key) => {
   const len = fleet()[key];
-    console.log('1', acc);
   return placeRandom(len, key, acc)
 }, initBoard);
 
 // @@TODO placeFleet func
 const p2Board = Object.keys(fleet()).reduce( (acc, key) => {
   const len = fleet()[key];
-    console.log('2', acc);
   return placeRandom(len, key, acc)
 }, initBoard);
+
+console.log('CC', coordsFromKey(p2Board, 'C'));
 
 const p1_r1 = fire(Math.floor(Math.random() * 9), Math.floor(Math.random() * 9), p2Board, opponentBoardPublic);
 const p1_r2 = fire(Math.floor(Math.random() * 9), Math.floor(Math.random() * 9), p2Board, p1_r1);
