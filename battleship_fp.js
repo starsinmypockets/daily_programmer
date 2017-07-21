@@ -65,7 +65,6 @@ const outOfBounds = (coords, grid) => {
 }
 
 const collision = (coords, grid) =>  coords.filter(c =>  { 
-    console.log('CCCC', c); 
     return (grid[c.y][c.x] !== '◯');
   }).length;
 
@@ -106,11 +105,8 @@ const placeBoat = (x, y, len, dir, grid) => {
 const updateOpponentBoardPublic = (x, y, hit, grid) => {
   return grid.map( (row, _y) => {
     if (_y === y) {
-        console.log('row', row);
       return row.map((val, _x) => {
-        console.log('val', val, hit);
         if (_x === x) {
-         console.log('MEH', hit);
          return (hit) ? '*' : '-';
         } else {
           return val;
@@ -124,11 +120,19 @@ const updateOpponentBoardPublic = (x, y, hit, grid) => {
 
 const fire = (x, y, opponentBoardHidden, opponentBoardPublic) => {
   const hit = collision([{x: x, y: y}], opponentBoardHidden);
-  console.log('HIT', hit);
   const newB = updateOpponentBoardPublic(x, y, hit, opponentBoardPublic);
-  console.log("NN", newB);
   return newB;
 }
+
+const fleet = () => ({
+  C: 5,
+  b: 4,
+  B: 4,
+  R: 3,
+  r: 3,
+  D: 2,
+  d: 2,
+})
 
 /**
  * COMPONENTS
@@ -193,7 +197,7 @@ var Game = React.createClass({
 });
 
 const runTests = function() {
-  	console.log('Get Coords');
+/*  	console.log('Get Coords');
   	console.log(getCoords(4, 'd', 3, 'l'));
   	console.log(getCoords(2, 'd', 13, 'r'));
   	console.log(getCoords(5, 'e', 5, 'u'));
@@ -203,8 +207,9 @@ const runTests = function() {
     console.log(outOfBounds([{x:0, y:9}, {x:0, y:8}])); // 0
     console.log(outOfBounds([{x:9, y:0}, {x:10, y:0}])); // 1
     console.log(outOfBounds([{x:0, y:9}, {x:0, y:8}, {x:0, y:11}, {x:0, y:12}])); // 2
-  console.log('Place Boat');
-  console.log(placeBoat(5, 'b', 3, 'd', makeBoard(gx, gy))); // valid
+    console.log('Place Boat');
+    console.log(placeBoat(5, 'b', 3, 'd', makeBoard(gx, gy))); // valid
+*/
 }
 
 // runTests();
@@ -216,28 +221,21 @@ const initBoard = makeBoard(gx, gy);
 const opponentBoardHidden = makeBoard(gx, gy);
 const opponentBoardPublic = makeBoard(gx, gy);
 
-// @@TODO placeFleet func
-const p1_1 = placeRandom(5, initBoard);
-const p1_2 = placeRandom(4, p1_1);
-const p1_3 = placeRandom(4, p1_2);
-const p1_4 = placeRandom(3, p1_3);
-const p1_5 = placeRandom(3, p1_4);
-const p1_6 = placeRandom(2, p1_5);
-const p1_7 = placeRandom(2, p1_6);
+const p1Board = Object.keys(fleet()).reduce( (acc, key) => {
+  const len = fleet()[key];
+  return placeRandom(len, acc)
+}, initBoard);
 
 // @@TODO placeFleet func
-const p2_1 = placeRandom(5, opponentBoardHidden);
-const p2_2 = placeRandom(4, p2_1);
-const p2_3 = placeRandom(4, p2_2);
-const p2_4 = placeRandom(3, p2_3);
-const p2_5 = placeRandom(3, p2_4);
-const p2_6 = placeRandom(2, p2_5);
-const p2_7 = placeRandom(2, p2_6);
+const p2Board = Object.keys(fleet()).reduce( (acc, key) => {
+  const len = fleet()[key];
+  return placeRandom(len, acc)
+}, initBoard);
 
-const p1_r1 = fire(Math.floor(Math.random() * 9), Math.floor(Math.random() * 9), p2_7, opponentBoardPublic);
-const p1_r2 = fire(Math.floor(Math.random() * 9), Math.floor(Math.random() * 9), p2_7, p1_r1);
-const p1_r3 = fire(Math.floor(Math.random() * 9), Math.floor(Math.random() * 9), p2_7, p1_r2);
-const p1_r4 = fire(Math.floor(Math.random() * 9), Math.floor(Math.random() * 9), p2_7, p1_r3);
-const p1_r5 = fire(Math.floor(Math.random() * 9), Math.floor(Math.random() * 9), p2_7, p1_r4);
+const p1_r1 = fire(Math.floor(Math.random() * 9), Math.floor(Math.random() * 9), p2Board, opponentBoardPublic);
+const p1_r2 = fire(Math.floor(Math.random() * 9), Math.floor(Math.random() * 9), p2Board, p1_r1);
+const p1_r3 = fire(Math.floor(Math.random() * 9), Math.floor(Math.random() * 9), p2Board, p1_r2);
+const p1_r4 = fire(Math.floor(Math.random() * 9), Math.floor(Math.random() * 9), p2Board, p1_r3);
+const p1_r5 = fire(Math.floor(Math.random() * 9), Math.floor(Math.random() * 9), p2Board, p1_r4);
 
-React.render( <Game grid={p1_7} cols={gx} idxs={gy} opponentBoardPublic={p1_r5} opponentBoardHidden={p2_7} />, document.body );
+React.render( <Game grid={p1Board} cols={gx} idxs={gy} opponentBoardPublic={p1_r5} opponentBoardHidden={p2Board} />, document.body );
