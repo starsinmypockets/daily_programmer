@@ -129,19 +129,21 @@ const updateOpponentBoardPublic = (x, y, hit, grid) => {
   });
 }
 
-const isSunk = (x, y, grid) => {
-  // get x,y key
-  const pubCoords = [];
-  const privCoords = [];
-  // compare - if all are hits it is sunk
-  const sunk = pubCoords.length === privCoords.length;
-  return sunk;
+const isSunk = (x, y, hit, hidden, publicBoard) => {
+  if (!hit) return false;
+
+  const key = hidden[y][x];
+  const hitBoatCoords = coordsFromKey(hidden, key);
+  const hits = coordsFromKey(publicBoard, '*');
+
+  console.log('hit', key, hitBoatCoords, hits);
+  if (_.isEqual(hits, hitBoatCoords)) alert('Battleship ' + key + ' sunk!!!!');
 }
 
 const fire = (x, y, opponentBoardHidden, opponentBoardPublic) => {
   const hit = collision([{x: x, y: y}], opponentBoardHidden);
   const newB = updateOpponentBoardPublic(x, y, hit, opponentBoardPublic);
-  const sunk = isSunk(x, y, newB);
+  const sunk = isSunk(x, y, hit, opponentBoardHidden, newB);
   return newB;
 }
 
@@ -218,7 +220,7 @@ var Game = React.createClass({
 });
 
 const runTests = function() {
-/*  	console.log('Get Coords');
+  	console.log('Get Coords');
   	console.log(getCoords(4, 'd', 3, 'l'));
   	console.log(getCoords(2, 'd', 13, 'r'));
   	console.log(getCoords(5, 'e', 5, 'u'));
@@ -230,13 +232,12 @@ const runTests = function() {
     console.log(outOfBounds([{x:0, y:9}, {x:0, y:8}, {x:0, y:11}, {x:0, y:12}])); // 2
     console.log('Place Boat');
     console.log(placeBoat(5, 'b', 3, 'd', makeBoard(gx, gy))); // valid
-*/
 }
 
 // runTests();
 
 /**
- * Game 1
+ * Game 1 - player 1 only
  **/
 const initBoard = makeBoard(gx, gy);
 const opponentBoardHidden = makeBoard(gx, gy);
@@ -253,12 +254,8 @@ const p2Board = Object.keys(fleet()).reduce( (acc, key) => {
   return placeRandom(len, key, acc)
 }, initBoard);
 
-console.log('CC', coordsFromKey(p2Board, 'C'));
+const nuclearWar = _.range(0,60,1).reduce( (acc, n) => {
+  return fire(Math.floor(Math.random() * 9), Math.floor(Math.random() * 9), p2Board, acc);
+}, opponentBoardPublic);
 
-const p1_r1 = fire(Math.floor(Math.random() * 9), Math.floor(Math.random() * 9), p2Board, opponentBoardPublic);
-const p1_r2 = fire(Math.floor(Math.random() * 9), Math.floor(Math.random() * 9), p2Board, p1_r1);
-const p1_r3 = fire(Math.floor(Math.random() * 9), Math.floor(Math.random() * 9), p2Board, p1_r2);
-const p1_r4 = fire(Math.floor(Math.random() * 9), Math.floor(Math.random() * 9), p2Board, p1_r3);
-const p1_r5 = fire(Math.floor(Math.random() * 9), Math.floor(Math.random() * 9), p2Board, p1_r4);
-
-React.render( <Game grid={p1Board} cols={gx} idxs={gy} opponentBoardPublic={p1_r5} opponentBoardHidden={p2Board} />, document.body );
+React.render( <Game grid={p1Board} cols={gx} idxs={gy} opponentBoardPublic={nuclearWar} opponentBoardHidden={p2Board} />, document.body );
